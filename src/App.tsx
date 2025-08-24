@@ -12,6 +12,23 @@ type CountryOption = {
   description: string
 }
 
+interface SunriseSunsetResponse {
+  results: {
+    sunrise: string
+    sunset: string
+    solar_noon: string
+    day_length: string
+    civil_twilight_begin: string
+    civil_twilight_end: string
+    nautical_twilight_begin: string
+    nautical_twilight_end: string
+    astronomical_twilight_begin: string
+    astronomical_twilight_end: string
+  }
+  status: string
+  tzid?: string
+}
+
 interface AppProps {
   appInsights: ApplicationInsights
 }
@@ -19,7 +36,7 @@ interface AppProps {
 function App({ appInsights }: AppProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null)
-  const [sunriseSunsetData, setSunriseSunsetData] = useState<any>(null)
+  const [sunriseSunsetData, setSunriseSunsetData] = useState<SunriseSunsetResponse | null>(null)
 
   const handleShow = async () => {
     if (!selectedDate || !selectedCountry) return;
@@ -62,7 +79,7 @@ function App({ appInsights }: AppProps) {
       // Track API request success/failure
       if (response.ok && data.status === 'OK') {
         setSunriseSunsetData(data);
-        
+
         appInsights.trackDependencyData({
           id: `sunrise-sunset-api-${Date.now()}`,
           target: 'api.sunrise-sunset.org',

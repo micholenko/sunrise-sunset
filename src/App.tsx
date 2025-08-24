@@ -24,7 +24,7 @@ function App() {
     
     try {
       // Get coordinates for the selected country
-      const coordinates = countriesData[selectedCountry.label];
+      const coordinates = (countriesData as CountriesData)[selectedCountry.label];
       console.log('Coordinates for country:', selectedCountry, coordinates);
       if (!coordinates || coordinates.length < 2) {
         console.error('Invalid coordinates for country:', selectedCountry);
@@ -93,7 +93,10 @@ function App() {
             label="Select Country"
             placeholder="Search for a country..."
             value={selectedCountry}
-            onChange={(value: CountryOption | null) => setSelectedCountry(value)}
+            onChange={(value: string) => {
+              const countryOption = countryOptions.find(option => option.value === value);
+              setSelectedCountry(countryOption || null);
+            }}
             options={countryOptions}
             debounceTimeout={300}
           />

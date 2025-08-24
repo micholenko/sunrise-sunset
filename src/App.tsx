@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DatePicker, Lookup, Button } from 'react-rainbow-components'
+import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import countriesData from './assets/countries_coordinates.json'
 
 type CountriesData = Record<string, number[]>
@@ -11,13 +12,29 @@ type CountryOption = {
   description: string
 }
 
-function App() {
+interface AppProps {
+  appInsights: ApplicationInsights
+}
+
+function App({ appInsights }: AppProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null)
   const [sunriseSunsetData, setSunriseSunsetData] = useState<any>(null)
 
   const handleShow = async () => {
     if (!selectedDate || !selectedCountry) return;
+    
+    const startTime = Date.now();
+    
+    // Track user action
+    appInsights.trackEvent({
+      name: 'SunriseSunsetRequest',
+      properties: {
+        country: selectedCountry.label,
+        date: selectedDate.toISOString().split('T')[0],
+        coordinates: `${(countriesData as CountriesData)[selectedCountry.label]?.join(', ')}`
+      }
+    });
     
     console.log('Selected Date:', selectedDate)
     console.log('Selected Country:', selectedCountry)
@@ -40,9 +57,36 @@ function App() {
       
       const response = await fetch(apiUrl);
       const data = await response.json();
-      setSunriseSunsetData(data);
+      const duration = Date.now() - startTime;
       
-      if (data.status === 'OK') {
+      // Track API request success/failure
+      if (response.ok && data.status === 'OK') {
+        setSunriseSunsetData(data);
+        
+        appInsights.trackDependencyData({
+          id: `sunrise-sunset-api-${Date.now()}`,
+          target: 'api.sunrise-sunset.org',
+          name: 'GET /json',
+          data: apiUrl,
+          duration: duration,
+          success: true,
+          responseCode: response.status,
+          properties: {
+            country: selectedCountry.label,
+            date: formattedDate,
+            lat: lat.toString(),
+            lng: lng.toString()
+          }
+        });
+        
+        appInsights.trackMetric({
+          name: 'API Response Time',
+          average: duration,
+          properties: {
+            endpoint: 'sunrise-sunset-api'
+          }
+        });
+        
         console.log('Sunrise-Sunset Data:', data.results);
         // You can add state to store and display this data
       } else {

@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {HeroUIProvider} from "@heroui/react";
 
 // Only initialize Application Insights in production
-const isProduction = import.meta.env.PROD;
+const isProduction = import.meta.env.PROD && window.location.hostname !== 'localhost';
 let appInsights: ApplicationInsights | null = null;
 
 // Create a client for React Query

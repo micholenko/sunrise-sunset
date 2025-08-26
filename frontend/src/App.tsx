@@ -42,7 +42,7 @@ function App({ appInsights }: AppProps) {
     error,
     refetch
   } = useQuery({
-    queryKey: ['sunriseSunset', queryParams],
+    queryKey: ['sunriseSunset', selectedCountry, selectedDate ? dateValueToString(selectedDate) : null],
     queryFn: () => fetchSunriseSunsetData(queryParams!),
     enabled: false, // Disable automatic fetching
     retry: 1,

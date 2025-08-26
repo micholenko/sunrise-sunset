@@ -28,6 +28,7 @@ export const fetchSunriseSunsetData = async ({
     name: 'SunriseSunsetRequest',
     properties: {
       country: selectedCountry.label,
+      countryCode: selectedCountry.countryCode || 'unknown',
       date: date
     }
   })
@@ -51,6 +52,7 @@ export const fetchSunriseSunsetData = async ({
       responseCode: response.status,
       properties: {
         country: selectedCountry.label,
+        countryCode: selectedCountry.countryCode || 'unknown',
         date: date,
         error: data.detail || 'Network error'
       }
@@ -70,6 +72,7 @@ export const fetchSunriseSunsetData = async ({
     responseCode: response.status,
     properties: {
       country: selectedCountry.label,
+      countryCode: selectedCountry.countryCode || 'unknown',
       date: date,
       coordinates: data.coordinates ? data.coordinates.join(', ') : 'unknown'
     }

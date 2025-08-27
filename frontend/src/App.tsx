@@ -3,37 +3,18 @@ import { Button } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import { DatePickerComponent, CountrySelect, Results } from './components'
 import { fetchSunriseSunsetData, dateValueToString } from './services/api'
-import countries from 'i18n-iso-countries';
-import enLocale from 'i18n-iso-countries/langs/en.json';
-import type { CalendarDate } from '@heroui/react'
+import { CalendarDate } from '@internationalized/date'
 import type {
   AppProps,
-  CountryOption
 } from './types'
 
-// Register the locale
-countries.registerLocale(enLocale);
 
 function App({ appInsights }: AppProps) {
-  const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null)
-  const [selectedCountry, setSelectedCountry] = useState<string>('')
+  const today = new Date()
+  const todayCD = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
 
-  // Get country options as a dictionary
-  const countryOptions = countries.getNames('en', { select: 'alias' });
-
-  // Prepare query parameters
-  const queryParams = selectedDate && selectedCountry ? {
-    country: selectedCountry,
-    date: dateValueToString(selectedDate),
-    appInsights,
-    selectedCountry: {
-      key: selectedCountry,
-      label: selectedCountry,
-      value: selectedCountry,
-      description: `Selected country: ${selectedCountry}`,
-      countryCode: Object.keys(countryOptions).find(code => countryOptions[code] === selectedCountry)?.toLowerCase()
-    } as CountryOption
-  } : null
+  const [selectedDate, setSelectedDate] = useState<CalendarDate | null | undefined>(todayCD)
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string>('')
 
   // Use react-query to fetch data
   const {
@@ -42,14 +23,18 @@ function App({ appInsights }: AppProps) {
     error,
     refetch
   } = useQuery({
-    queryKey: ['sunriseSunset', selectedCountry, selectedDate ? dateValueToString(selectedDate) : null],
-    queryFn: () => fetchSunriseSunsetData(queryParams!),
-    enabled: false, // Disable automatic fetching
+    queryKey: ['sunriseSunset', selectedCountryCode, selectedDate ? dateValueToString(selectedDate) : null],
+    queryFn: () => fetchSunriseSunsetData({
+      country_code: selectedCountryCode,
+      date: dateValueToString(selectedDate),
+      appInsights
+    }),
+    enabled: false,
     retry: 1,
   })
 
   const handleShow = () => {
-    if (!selectedDate || !selectedCountry) return
+    if (!selectedDate || !selectedCountryCode) return
     refetch()
   }
 
@@ -64,17 +49,16 @@ function App({ appInsights }: AppProps) {
         />
 
         <CountrySelect
-          selectedCountry={selectedCountry}
-          onCountryChange={setSelectedCountry}
-          countryOptions={countryOptions}
+          selectedCountry={selectedCountryCode}
+          onCountryChange={setSelectedCountryCode}
         />
       </div>
 
       <div className="text-center mt-5">
         <Button
           color="primary"
-          onClick={handleShow}
-          isDisabled={!selectedDate || !selectedCountry || isLoading}
+          onPress={handleShow}
+          isDisabled={!selectedDate || !selectedCountryCode || isLoading}
           isLoading={isLoading}
         >
           {isLoading ? "Loading..." : "Show"}

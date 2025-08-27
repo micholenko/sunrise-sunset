@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import json
+import uvicorn
 
 app = FastAPI(title="Sunrise Sunset API Proxy", version="1.0.0")
 
@@ -30,22 +31,25 @@ async def root():
     return {"message": "Sunrise Sunset API Proxy"}
 
 @app.get("/api/sunrise-sunset")
-async def get_sunrise_sunset(country: str, date: str):
+async def get_sunrise_sunset(country_code: str, date: str):
     """
     Proxy endpoint for sunrisesunset.io API which returns times in local timezone.
     
     Args:
-        country: Country name to lookup coordinates
+        country_code: Two-letter country code to lookup coordinates
         date: Date in YYYY-MM-DD format
     """
     try:
-        # Look up coordinates for the country
-        if country not in countries_coordinates:
-            raise HTTPException(status_code=400, detail=f"Country '{country}' not found in coordinates database")
+        # Convert country code to uppercase for lookup
+        country_code_upper = country_code.upper()
         
-        coordinates = countries_coordinates[country]
+        # Look up coordinates for the country code
+        if country_code_upper not in countries_coordinates:
+            raise HTTPException(status_code=400, detail=f"Country code '{country_code}' not found in coordinates database")
+        
+        coordinates = countries_coordinates[country_code_upper]
         if not coordinates or len(coordinates) < 2:
-            raise HTTPException(status_code=400, detail=f"Invalid coordinates for country '{country}'")
+            raise HTTPException(status_code=400, detail=f"Invalid coordinates for country code '{country_code}'")
         
         lat, lng = coordinates[0], coordinates[1]
         
@@ -60,15 +64,13 @@ async def get_sunrise_sunset(country: str, date: str):
         if data.get("status") != "OK":
             raise HTTPException(status_code=400, detail=f"External API error: {data.get('status', 'Unknown error')}")
         
-        # Return the results as-is since they're already in local timezone
         results = data["results"]
-        print(f"Results for {country} ({lat}, {lng}) on {date}:", results)
+        print(f"Results for {country_code} ({lat}, {lng}) on {date}:", results)
         
         return {
             "sunrise": results.get("sunrise"),
             "sunset": results.get("sunset"),
-            "country": country,
-            "coordinates": [lat, lng]
+            "timezone": results.get("timezone"),
         }
         
     except HTTPException:
@@ -80,5 +82,4 @@ async def get_sunrise_sunset(country: str, date: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

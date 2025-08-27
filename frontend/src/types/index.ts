@@ -1,24 +1,11 @@
-import type { CalendarDate } from '@heroui/react'
+import { CalendarDate } from '@internationalized/date'
 import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 
-export type CountriesData = Record<string, number[]>
-
-export type CountryOption = {
-  key: string
-  label: string
-  value: string
-  description: string
-  countryCode?: string
-}
 
 export interface SunriseSunsetResponse {
   sunrise: string
   sunset: string
-  results?: {
-    sunrise: string
-    sunset: string
-    [key: string]: string | number
-  }
+  timezone: string
 }
 
 export interface AppProps {
@@ -26,10 +13,9 @@ export interface AppProps {
 }
 
 export interface FetchSunriseSunsetParams {
-  country: string
+  country_code: string
   date: string
   appInsights: ApplicationInsights | null
-  selectedCountry: CountryOption
 }
 
 export interface DatePickerComponentProps {
@@ -40,7 +26,6 @@ export interface DatePickerComponentProps {
 export interface CountrySelectProps {
   selectedCountry: string
   onCountryChange: (country: string) => void
-  countryOptions: Record<string, string>
 }
 
 export interface ResultsProps {

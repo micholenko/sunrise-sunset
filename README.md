@@ -1,35 +1,19 @@
-# Sunrise Sunset Full Stack Application
+# Sunrise Sunset Application
 
-A full-stack application that provides sunrise and sunset times for any location worldwide, with automatic timezone conversion.
+An application that provides sunrise and sunset times for a given date and country. Deployed on Azure with automated CI/CD pipelines and basic tests.
+
+## Deployments
+
+- Azure Static Web Apps (FE App): [https://purple-sky-0cb669b03.1.azurestaticapps.net/](https://purple-sky-0cb669b03.1.azurestaticapps.net/)
+- Azure App Service (BE proxy): [https://sunrise-sunset-backend.azurewebsites.net/](https://sunrise-sunset-backend.azurewebsites.net/)
+- Azure Application Insights
+
 
 ## Architecture
 
 - **Frontend**: React + TypeScript + Vite + HeroUI
-- **Backend**: FastAPI + Python (acts as a proxy with timezone conversion)
-- **API**: Uses sunrise-sunset.org API through the backend proxy
-
-## Project Structure
-
-```
-├── frontend/           # React frontend application
-│   ├── src/
-│   ├── public/
-│   └── package.json
-├── backend/            # FastAPI backend
-│   ├── main.py
-│   ├── start.py
-│   └── requirements.txt
-└── README.md
-```
-
-## Features
-
-- 🌅 Get sunrise and sunset times for any country
-- 🕐 Automatic timezone conversion to local time
-- 🎨 Modern UI with HeroUI components
-- 📱 Responsive design
-- 📊 Application Insights integration
-- ⚡ Fast API proxy with caching
+- **Backend**: FastAPI + Python (Not strictly needed, acts as a proxy, made to try deployment to App Service)
+- **API**: Uses sunrisesunset.io API
 
 ## Quick Start
 
@@ -44,7 +28,7 @@ A full-stack application that provides sunrise and sunset times for any location
 ```bash
 cd backend
 pip install -r requirements.txt
-python start.py
+python main.py
 ```
 
 The backend will run on http://localhost:8000
@@ -59,36 +43,7 @@ npm run dev
 
 The frontend will run on http://localhost:5173
 
-### 3. Using the Application
-
-1. Open http://localhost:5173 in your browser
-2. Select a date using the date picker
-3. Search and select a country from the autocomplete dropdown
-4. Click "Show" to get sunrise/sunset times in the local timezone
-
 ## Development
-
-### Backend Development
-
-The backend is a FastAPI application that:
-- Proxies requests to sunrise-sunset.org API
-- Automatically detects timezone from coordinates
-- Converts all times from UTC to local timezone
-- Provides CORS support for frontend integration
-
-Run in development mode:
-```bash
-cd backend
-python start.py
-```
-
-### Frontend Development
-
-The frontend is a React application built with:
-- TypeScript for type safety
-- Vite for fast development and building
-- HeroUI for modern components
-- TanStack Query for API state management
 
 Run in development mode:
 ```bash
@@ -96,9 +51,20 @@ cd frontend
 npm run dev
 ```
 
-## API Documentation
+## Testing
 
-Once the backend is running, visit http://localhost:8000/docs for interactive API documentation.
+### Frontend Tests
+```bash
+cd frontend
+npm test        
+npm run test:ui
+```
+
+### Backend Tests
+```bash
+cd backend
+python -m pytest
+```
 
 ## Building for Production
 
@@ -129,10 +95,5 @@ npm run build
 - FastAPI
 - httpx (async HTTP client)
 - pytz (timezone support)
-- timezonefinder (coordinate-based timezone detection)
 - uvicorn (ASGI server)
 
-## Deployments
-
-- GitHub Pages: [https://micholenko.github.io/sunrise-sunset/](https://micholenko.github.io/sunrise-sunset/)
-- Azure Static Web Apps: [https://purple-sky-0cb669b03.1.azurestaticapps.net/](https://purple-sky-0cb669b03.1.azurestaticapps.net/)

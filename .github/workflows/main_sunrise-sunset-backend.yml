@@ -5,10 +5,12 @@
 name: Build and deploy Python app to Azure Web App - sunrise-sunset-backend
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: false
+        default: 'production'
 
 jobs:
   build:

@@ -10,6 +10,7 @@ export const DatePickerComponent = ({ selectedDate, onDateChange }: DatePickerCo
                 <DatePicker
                     label="Select Date"
                     labelPlacement='outside'
+                    // @ts-expect-error: Type incompatibility, but works
                     value={selectedDate}
                     onChange={(date) => onDateChange(date)}
                     showMonthAndYearPickers

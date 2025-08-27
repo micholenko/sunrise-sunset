@@ -1,5 +1,7 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 
@@ -11,16 +13,34 @@ const mockAppInsights = {
   trackMetric: vi.fn(),
 } as unknown as ApplicationInsights
 
+// Helper function to render components with QueryClient provider
+const renderWithProviders = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+      },
+    },
+  })
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>
+  )
+}
+
 describe('App Component', () => {
   it('renders the app title', () => {
-    render(<App appInsights={mockAppInsights} />)
+    renderWithProviders(<App appInsights={mockAppInsights} />)
     
     // Check if the main heading is rendered
     expect(screen.getByText('Sunrise Sunset App')).toBeInTheDocument()
   })
 
   it('renders date picker and country lookup', () => {
-    render(<App appInsights={mockAppInsights} />)
+    renderWithProviders(<App appInsights={mockAppInsights} />)
     
     // Check if date picker label is present
     expect(screen.getByText('Select Date')).toBeInTheDocument()
@@ -30,17 +50,17 @@ describe('App Component', () => {
   })
 
   it('renders show button that is initially disabled', () => {
-    render(<App appInsights={mockAppInsights} />)
+    renderWithProviders(<App appInsights={mockAppInsights} />)
     
     // Check if the Show button is present and disabled
-    const showButton = screen.getByRole('button', { name: /show/i })
+    const showButton = screen.getByRole('button', { name: /^show$/i })
     expect(showButton).toBeInTheDocument()
     expect(showButton).toBeDisabled()
   })
 
   it('renders without crashing with valid props', () => {
     expect(() => {
-      render(<App appInsights={mockAppInsights} />)
+      renderWithProviders(<App appInsights={mockAppInsights} />)
     }).not.toThrow()
   })
 })

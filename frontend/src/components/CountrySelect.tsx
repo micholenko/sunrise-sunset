@@ -1,4 +1,7 @@
 import { Autocomplete, AutocompleteItem } from '@heroui/react'
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+
 import type { CountrySelectProps } from '../types'
 
 const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
@@ -10,25 +13,25 @@ const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
       alt={`Flag of ${countryCode}`}
       className="w-5 h-3 object-cover rounded-sm mr-2"
       onError={(e) => {
-        // Hide the image if it fails to load
         (e.target as HTMLImageElement).style.display = 'none';
       }}
     />
   );
 };
 
-export const CountrySelect = ({ selectedCountry, onCountryChange, countryOptions }: CountrySelectProps) => {
-  console.log(countryOptions);
-  
-  // Convert the dictionary to an array of options
-  const optionsArray = Object.entries(countryOptions).map(([countryCode, countryName]) => ({
-    key: countryName,
+countries.registerLocale(enLocale);
+// Build once at module load
+const countryOptions = countries.getNames('en', { select: 'alias' });
+const optionsArray = Object.entries(countryOptions)
+  .map(([countryCode, countryName]) => ({
+    key: countryCode,
     label: countryName,
-    value: countryName,
-    description: `Country code: ${countryCode}`,
-    countryCode: countryCode.toLowerCase()
-  })).sort((a, b) => a.label.localeCompare(b.label));
-  
+    countryCode: countryCode.toLowerCase(),
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+
+export const CountrySelect = ({ selectedCountry, onCountryChange }: CountrySelectProps) => {
   return (
     <div className="flex-1">
       <Autocomplete
